@@ -1,33 +1,62 @@
-// src/types/navigation.ts
-
 import { NavigatorScreenParams } from '@react-navigation/native';
 import { StackScreenProps } from '@react-navigation/stack';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import { Strings } from '../constants/strings';
 
-// Tipos para a navegação por abas
-export type AppTabParamList = {
-  Mapa: undefined;
-  Biblioteca: undefined;
-  Relatorios: undefined;
-  Perfil: undefined;
-};
+// --- Parâmetros das Rotas ---
 
-// Tipos para a navegação por pilha (se você tiver)
-// Exemplo: se uma tela dentro da aba "Biblioteca" puder abrir um detalhe da espécie
+/**
+ * Define os parâmetros para a navegação por pilha dentro da aba 'Biblioteca'.
+ * Permite navegar para a tela de detalhes de um bioindicador.
+ */
 export type LibraryStackParamList = {
-  Library: undefined;
-  BioindicadorDetalhe: { bioindicadorId: string };
+  [Strings.navigation.library]: undefined; // A tela inicial da aba
+  BioindicadorDetalhe: { bioindicadorId: string; nomePopular: string };
 };
 
-// Tipos para as telas
-export type MapScreenProps = BottomTabScreenProps<AppTabParamList, 'Mapa'>;
-export type LibraryScreenProps = BottomTabScreenProps<AppTabParamList, 'Biblioteca'>;
+/**
+ * Define os parâmetros para a navegação por abas na raiz do aplicativo.
+ * Cada aba é uma tela ou um navegador (como a pilha da 'Biblioteca').
+ */
+export type AppTabParamList = {
+  [Strings.navigation.map]: undefined;
+  [Strings.navigation.library]: NavigatorScreenParams<LibraryStackParamList>;
+  [Strings.navigation.reports]: undefined;
+  [Strings.navigation.profile]: undefined;
+};
 
-// Tipagem completa para o root (que pode conter múltiplas navegações)
+// --- Tipagem para Telas ---
+
+/**
+ * Tipagem para as props da tela de Mapa.
+ */
+export type MapScreenProps = BottomTabScreenProps<AppTabParamList, typeof Strings.navigation.map>;
+
+/**
+ * Tipagem para as props da tela de Biblioteca (a raiz da pilha).
+ */
+export type LibraryScreenProps = StackScreenProps<LibraryStackParamList, typeof Strings.navigation.library>;
+
+/**
+ * Tipagem para as props da tela de Detalhes de Bioindicador.
+ */
+export type BioindicadorDetalheScreenProps = StackScreenProps<LibraryStackParamList, 'BioindicadorDetalhe'>;
+
+// --- Tipagem Raiz ---
+
+/**
+ * Tipagem completa para o navegador raiz.
+ */
 export type RootStackParamList = {
-  Tabs: NavigatorScreenParams<AppTabParamList>;
-  // Outras telas que não estão nas abas podem ser adicionadas aqui
+  // Telas iniciais que não fazem parte das abas, como Splash e Autenticação.
+  Splash: undefined;
+  Auth: undefined;
+  // O AppStack representa o fluxo principal do aplicativo após a autenticação.
+  AppStack: NavigatorScreenParams<AppTabParamList>;
 };
 
-// Exemplo de como usar a tipagem em um componente de tela
-// export type BioindicadorDetalheScreenProps = StackScreenProps<LibraryStackParamList, 'BioindicadorDetalhe'>;
+declare global {
+  namespace ReactNavigation {
+    interface RootParamList extends RootStackParamList {}
+  }
+}

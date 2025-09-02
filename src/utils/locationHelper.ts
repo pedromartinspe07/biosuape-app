@@ -2,29 +2,59 @@
 
 import * as Location from 'expo-location';
 
+// --- Tipos para o helper de localização ---
+
 /**
- * Solicita permissão de acesso à localização do usuário.
- * @returns Um objeto com o status da permissão e a mensagem de erro, se houver.
+ * Define a estrutura de um objeto de coordenadas geográficas.
  */
-export const requestLocationPermission = async () => {
-  let { status } = await Location.requestForegroundPermissionsAsync();
-  if (status !== 'granted') {
+export interface Coords {
+  latitude: number;
+  longitude: number;
+}
+
+/**
+ * Define a estrutura do objeto de retorno da função de permissão.
+ */
+interface PermissionResponse {
+  granted: boolean;
+  error: string | null;
+}
+
+// --- Funções do helper de localização ---
+
+/**
+ * Solicita permissão de acesso à localização do usuário em primeiro plano.
+ * Retorna um objeto com o status da permissão e a mensagem de erro, se houver.
+ * @returns {Promise<PermissionResponse>} Um objeto com o status da permissão.
+ */
+export const requestLocationPermission = async (): Promise<PermissionResponse> => {
+  try {
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') {
+      return {
+        granted: false,
+        error: 'Permissão para acessar a localização foi negada. Por favor, habilite-a nas configurações do seu dispositivo.',
+      };
+    }
+    return {
+      granted: true,
+      error: null,
+    };
+  } catch (err) {
+    console.error('Erro ao solicitar permissão de localização:', err);
     return {
       granted: false,
-      error: 'Permissão para acessar a localização foi negada.'
+      error: 'Não foi possível solicitar a permissão de localização.',
     };
   }
-  return {
-    granted: true,
-    error: null
-  };
 };
 
 /**
  * Obtém a localização atual do dispositivo.
- * @returns As coordenadas (latitude e longitude) ou null em caso de erro.
+ * Retorna um objeto de coordenadas (latitude e longitude) ou null em caso de erro.
+ * @returns {Promise<Coords | null>} As coordenadas do dispositivo.
  */
-export const getCurrentLocation = async () => {
+export const getCurrentLocation = async (): Promise<Coords | null> => {
   try {
     const permissionStatus = await requestLocationPermission();
     if (!permissionStatus.granted) {
