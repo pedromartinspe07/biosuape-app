@@ -1,35 +1,62 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Dimensions, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Dimensions, ActivityIndicator, Alert } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import { Colors } from '../constants/colors';
 import { Strings } from '../constants/strings';
 import Card from '../components/common/Card';
+import { getAuthToken } from '../utils/authHelper';
+import { API_BASE_URL } from '../constants/api';
 
 const screenWidth = Dimensions.get('window').width;
 
-const mockData = {
-  labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
-  datasets: [
-    {
-      data: [20, 45, 28, 80, 99, 43],
-      color: (opacity = 1) => `rgba(0, 123, 255, ${opacity})`,
-      strokeWidth: 2,
-    },
-  ],
-};
+// Define a estrutura de dados esperada da API
+interface ReportData {
+  labels: string[];
+  datasets: {
+    data: number[];
+    color: (opacity: number) => string;
+    strokeWidth: number;
+  }[];
+}
 
 const ReportsScreen: React.FC = () => {
   const [loading, setLoading] = useState(true);
-  const [reportData, setReportData] = useState(mockData);
+  const [reportData, setReportData] = useState<ReportData | null>(null);
+
+  const fetchReports = async () => {
+    setLoading(true);
+    try {
+      const token = await getAuthToken();
+      if (!token) {
+        Alert.alert(Strings.alerts.errorTitle, 'Usuário não autenticado.');
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/relatorios`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Falha ao buscar dados do relatório.');
+      }
+
+      const data = await response.json();
+      
+      // A API precisa retornar os dados no formato esperado pelo gráfico
+      setReportData(data);
+    } catch (error) {
+      console.error('Falha ao buscar relatórios:', error);
+      Alert.alert(Strings.alerts.errorTitle, `Não foi possível carregar os relatórios: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);  
+      setReportData(null); // Define como nulo em caso de erro para exibir "sem dados"
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchReports = async () => {
-      // Simula a busca de dados da API
-      // Ex: const response = await api.get('/relatorios');
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      setLoading(false);
-      // setReportData(response.data); // Usaria os dados reais da API
-    };
     fetchReports();
   }, []);
 

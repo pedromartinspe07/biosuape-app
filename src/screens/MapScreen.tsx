@@ -9,19 +9,13 @@ import { getCurrentLocation } from '../utils/locationHelper';
 import Card from '../components/common/Card';
 import { Ocorrencia } from '../types/common';
 import ContributionForm from '../components/form/ContributionForm';
+import { getAuthToken } from '../utils/authHelper'; // Importa a função para pegar o token
+import { API_BASE_URL } from '../constants/api'; // Importa a URL base da API
 
-// TODO: Use a sua URL de API real
-const API_BASE_URL = 'http://192.168.1.9/api/v1';
-
-// Importa MapView, Marker e Callout apenas para plataformas móveis (Android e iOS)
 const MapView = Platform.OS === 'web' ? null : require('react-native-maps').default;
 const Marker = Platform.OS === 'web' ? null : require('react-native-maps').Marker;
 const Callout = Platform.OS === 'web' ? null : require('react-native-maps').Callout;
 
-// Remova este import:
-// import { LatLng } from 'react-native-maps';
-
-// Defina o tipo manualmente:
 type LatLng = { latitude: number; longitude: number };
 
 const MapScreen: React.FC = () => {
@@ -32,7 +26,7 @@ const MapScreen: React.FC = () => {
     longitudeDelta: 0.05,
   });
   const [isModalVisible, setModalVisible] = useState(false);
-  const [newMarkerCoord, setNewMarkerCoord] = useState<LatLng | null>(null);  // 'LatLng' é um tipo definido em 'react-native-maps'
+  const [newMarkerCoord, setNewMarkerCoord] = useState<LatLng | null>(null);
   const [selectedMarker, setSelectedMarker] = useState<Ocorrencia | null>(null);
   const [ocorrencias, setOcorrencias] = useState<Ocorrencia[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -41,48 +35,35 @@ const MapScreen: React.FC = () => {
   const fetchOcorrencias = async () => {
     setIsLoading(true);
     try {
-      // const response = await fetch(`${API_BASE_URL}/ocorrencias`);
-      // const data = await response.json();
-      // setOcorrencias(data);
-      
-      // Simulação de busca para fins de demonstração
-      const mockOcorrencias = [
-        {
-          id: '1',
-          usuarioId: 'user1',
-          bioindicadorId: '1',
-          latitude: -8.3123,
-          longitude: -34.9012,
-          dataHora: new Date().toISOString(),
-          observacoes: 'Grande quantidade de peixes-agulha, a água parece clara.',
-          imageUrl: 'https://via.placeholder.com/150',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+      const token = await getAuthToken();
+      if (!token) {
+        Alert.alert(Strings.alerts.errorTitle, 'Usuário não autenticado. Por favor, faça login novamente.');
+        // Em um app real, você pode redirecionar para a tela de login aqui
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/ocorrencias`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
         },
-        {
-          id: '2',
-          usuarioId: 'user2',
-          bioindicadorId: '2',
-          latitude: -8.32,
-          longitude: -34.905,
-          dataHora: new Date().toISOString(),
-          observacoes: 'Presença de algas vermelhas em áreas rasas, indicando possível poluição.',
-          imageUrl: 'https://via.placeholder.com/150',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-      ];
-      setOcorrencias(mockOcorrencias);
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Falha ao buscar ocorrências.');
+      }
+
+      const data = await response.json();
+      setOcorrencias(data);
     } catch (error) {
       console.error('Falha ao buscar ocorrências:', error);
-      Alert.alert(Strings.alerts.errorTitle, 'Não foi possível carregar as ocorrências.');
+      Alert.alert(Strings.alerts.errorTitle, `Não foi possível carregar as ocorrências: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    // Busca a localização do usuário e as ocorrências da API
     const fetchInitialData = async () => {
       const userLocation = await getCurrentLocation();
       if (userLocation) {

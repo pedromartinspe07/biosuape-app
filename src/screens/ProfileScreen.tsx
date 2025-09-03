@@ -7,39 +7,15 @@ import Card from '../components/common/Card';
 import { Ocorrencia } from '../types/common';
 import { formatDate } from '../utils/dataFormatter';
 
-// Dados de usuário e ocorrências mockados
-const mockUser = {
-  name: 'Pedro Henrique',
-  email: 'pedro.h@example.com',
-  memberSince: '2025-09-02T16:00:00Z',
+// Agora os dados viriam de um estado, de um contexto ou de uma API.
+// Aqui, eles estão vazios para mostrar o estado inicial sem dados.
+const user = {
+  name: 'Carregando...',
+  email: '',
+  memberSince: '',
 };
 
-const mockOcorrencias: Ocorrencia[] = [
-  {
-    id: '1',
-    usuarioId: 'user1',
-    bioindicadorId: '1',
-    latitude: -8.3123,
-    longitude: -34.9012,
-    dataHora: '2025-09-01T10:30:00Z',
-    observacoes: 'Grande quantidade de peixes-agulha, a água parece clara.',
-    imageUrl: 'https://via.placeholder.com/150',
-    createdAt: '2025-09-01T10:30:00Z',
-    updatedAt: '2025-09-01T10:30:00Z',
-  },
-  {
-    id: '2',
-    usuarioId: 'user1',
-    bioindicadorId: '2',
-    latitude: -8.32,
-    longitude: -34.905,
-    dataHora: '2025-08-25T14:45:00Z',
-    observacoes: 'Presença de algas vermelhas em áreas rasas, indicando possível poluição.',
-    imageUrl: 'https://via.placeholder.com/150',
-    createdAt: '2025-09-01T10:30:00Z',
-    updatedAt: '2025-09-01T10:30:00Z',
-  },
-];
+const ocorrencias: Ocorrencia[] = [];
 
 const ProfileScreen: React.FC = () => {
   const renderOcorrenciaItem = ({ item }: { item: Ocorrencia }) => (
@@ -60,19 +36,19 @@ const ProfileScreen: React.FC = () => {
         <View style={styles.profileIconContainer}>
           <Ionicons name="person-circle-outline" size={100} color={Colors.textSecondary} />
         </View>
-        <Text style={styles.userName}>{mockUser.name}</Text>
-        <Text style={styles.userEmail}>{mockUser.email}</Text>
+        <Text style={styles.userName}>{user.name}</Text>
+        <Text style={styles.userEmail}>{user.email}</Text>
         <Text style={styles.memberSince}>
-          Membro desde: {formatDate(mockUser.memberSince)}
+          Membro desde: {formatDate(user.memberSince)}
         </Text>
       </View>
 
       {/* Seção de Contribuições */}
       <View style={styles.contributionsSection}>
         <Text style={styles.sectionTitle}>Minhas Contribuições Recentes</Text>
-        {mockOcorrencias.length > 0 ? (
+        {ocorrencias.length > 0 ? (
           <FlatList
-            data={mockOcorrencias}
+            data={ocorrencias}
             renderItem={renderOcorrenciaItem}
             keyExtractor={(item) => item.id}
             scrollEnabled={false} // Desabilita o scroll da FlatList dentro da ScrollView
