@@ -1,36 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
+import * as ImagePicker from 'expo-image-picker';
+import { Formik } from 'formik';
+import React, { useEffect, useState } from 'react';
 import {
-  View,
+  ActivityIndicator,
+  Alert,
+  Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
   Text,
   TextInput,
-  StyleSheet,
-  Alert,
-  ActivityIndicator,
-  Keyboard,
-  TouchableWithoutFeedback,
   TouchableOpacity,
-  Image,
+  TouchableWithoutFeedback,
+  View,
 } from 'react-native';
-import { Formik } from 'formik';
 import * as Yup from 'yup';
-import * as ImagePicker from 'expo-image-picker';
-import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
 import { Strings } from '../../constants/strings';
-import { getCurrentLocation } from '../../utils/locationHelper';
+import { IContributionFormInput } from '../../types/common'; // Importa a interface do tipo common
+import { Coords, getCurrentLocation, LocationError } from '../../utils/locationHelper';
 import Card from '../common/Card';
 
-// Essa interface deve ser definida em src/types/common.ts
-export interface ContributionFormInput {
-  bioindicadorId: string;
-  observacoes: string;
-  ph: number | null;
-  temperaturaAgua: number | null;
-  imagemUrl?: string | null;
-}
-
 const validationSchema = Yup.object().shape({
-  bioindicadorId: Yup.string().required('A espécie é obrigatória'),
+  bioindicadorId: Yup.string().required(Strings.alerts.speciesRequired),
   observacoes: Yup.string().max(250, 'As observações não podem exceder 250 caracteres'),
   ph: Yup.number().typeError('pH deve ser um número').min(0, 'pH inválido').max(14, 'pH inválido').nullable(),
   temperaturaAgua: Yup.number().typeError('Temperatura deve ser um número').nullable(),
@@ -38,52 +34,45 @@ const validationSchema = Yup.object().shape({
 
 interface ContributionFormProps {
   onClose: () => void;
-  initialCoordinates?: { latitude: number; longitude: number };
+  initialCoordinates?: Coords;
 }
 
 // TODO: Implementar a função de envio para a API
 const submitToApi = async (payload: any) => {
-  // Exemplo de como a requisição para o backend poderia ser feita
-  // const response = await fetch('http://sua-api.com/api/v1/ocorrencias', {
-  //   method: 'POST',
-  //   headers: {
-  //     'Content-Type': 'application/json',
-  //   },
-  //   body: JSON.stringify(payload),
-  // });
-  // if (!response.ok) {
-  //   throw new Error('Falha na requisição da API');
-  // }
-  // return response.json();
-  
   return new Promise(resolve => setTimeout(resolve, 2000));
 };
 
 const ContributionForm: React.FC<ContributionFormProps> = ({ onClose, initialCoordinates }) => {
-  const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [location, setLocation] = useState<Coords | null>(null);
   const [image, setImage] = useState<string | null>(null);
 
   useEffect(() => {
+    const fetchLocation = async () => {
+      try {
+        const currentLocation = await getCurrentLocation();
+        setLocation(currentLocation);
+      } catch (error) {
+        if (error instanceof LocationError) {
+          Alert.alert(Strings.alerts.errorTitle, error.message);
+        } else {
+          Alert.alert(Strings.alerts.errorTitle, 'Ocorreu um erro ao obter a localização.');
+        }
+        onClose();
+      }
+    };
+
     if (initialCoordinates) {
       setLocation(initialCoordinates);
     } else {
-      const fetchLocation = async () => {
-        const currentLocation = await getCurrentLocation();
-        if (currentLocation) {
-          setLocation(currentLocation);
-        } else {
-          Alert.alert(Strings.alerts.locationDenied, 'Não foi possível obter sua localização.');
-          onClose();
-        }
-      };
       fetchLocation();
     }
   }, [initialCoordinates, onClose]);
 
   const handleImagePick = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert(Strings.alerts.imagePermissionDenied, 'Precisamos de permissão para acessar sua galeria de fotos para continuar.');
+      Alert.alert(Strings.alerts.imagePermissionDenied);
       return;
     }
 
@@ -99,7 +88,7 @@ const ContributionForm: React.FC<ContributionFormProps> = ({ onClose, initialCoo
     }
   };
 
-  const handleSubmit = async (values: ContributionFormInput, { setSubmitting, resetForm }: any) => {
+  const handleSubmit = async (values: IContributionFormInput, { setSubmitting, resetForm }: any) => {
     Keyboard.dismiss();
     
     if (!location) {
@@ -131,182 +120,222 @@ const ContributionForm: React.FC<ContributionFormProps> = ({ onClose, initialCoo
   };
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={styles.container}>
-        <Text style={styles.title}>{Strings.contributionForm.title}</Text>
-        <Formik<ContributionFormInput>
-          initialValues={{
-            bioindicadorId: '',
-            observacoes: '',
-            ph: null,
-            temperaturaAgua: null,
-          }}
-          validationSchema={validationSchema}
-          onSubmit={handleSubmit}
-        >
-          {({ handleChange, handleBlur, handleSubmit, values, errors, touched, isSubmitting, setFieldValue }) => (
-            <Card containerStyle={styles.cardContainer}>
-              <View>
-                <Text style={styles.label}>{Strings.contributionForm.speciesLabel}</Text>
-                <TextInput
-                  style={styles.input}
-                  onChangeText={handleChange('bioindicadorId')}
-                  onBlur={handleBlur('bioindicadorId')}
-                  value={values.bioindicadorId}
-                  placeholder={Strings.contributionForm.speciesPlaceholder}
-                  placeholderTextColor={Colors.textSecondary}
-                />
-                {touched.bioindicadorId && errors.bioindicadorId && (
-                  <Text style={styles.errorText}>{errors.bioindicadorId}</Text>
-                )}
-              </View>
+    <KeyboardAvoidingView 
+      style={styles.keyboardAvoidingView}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <Text style={styles.title}>{Strings.contributionForm.title}</Text>
+            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+              <Ionicons name="close" size={32} color={Colors.textPrimary} />
+            </TouchableOpacity>
+          </View>
+          <ScrollView contentContainerStyle={styles.scrollContent}>
+            <Formik<IContributionFormInput>
+              initialValues={{
+                bioindicadorId: '',
+                observacoes: '',
+                ph: null,
+                temperaturaAgua: null,
+                latitude: 0,
+                longitude: 0,
+              }}
+              validationSchema={validationSchema}
+              onSubmit={handleSubmit}
+            >
+              {({ handleChange, handleBlur, handleSubmit, values, errors, touched, isSubmitting, setFieldValue }) => (
+                <Card containerStyle={styles.cardContainer}>
+                  {/* Campo Espécie */}
+                  <View style={styles.inputGroup}>
+                    <Text style={styles.label}>{Strings.contributionForm.speciesLabel}</Text>
+                    <TextInput
+                      style={styles.input}
+                      onChangeText={handleChange('bioindicadorId')}
+                      onBlur={handleBlur('bioindicadorId')}
+                      value={values.bioindicadorId}
+                      placeholder={Strings.contributionForm.speciesPlaceholder}
+                      placeholderTextColor={Colors.textSecondary}
+                    />
+                    {touched.bioindicadorId && errors.bioindicadorId && (
+                      <Text style={styles.errorText}>{errors.bioindicadorId}</Text>
+                    )}
+                  </View>
 
-              <View style={styles.imagePickerContainer}>
-                <TouchableOpacity style={styles.imageButton} onPress={handleImagePick}>
-                  <Ionicons name="camera-outline" size={24} color={Colors.primary} />
-                  <Text style={styles.imageButtonText}>{Strings.contributionForm.pickImage}</Text>
-                </TouchableOpacity>
-                {image && <Image source={{ uri: image }} style={styles.imagePreview} />}
-              </View>
+                  {/* Seleção de Imagem */}
+                  <View style={styles.imagePickerContainer}>
+                    <TouchableOpacity style={styles.imageButton} onPress={handleImagePick}>
+                      <Ionicons name="camera-outline" size={24} color={Colors.textLight} />
+                      <Text style={styles.imageButtonText}>{Strings.contributionForm.pickImage}</Text>
+                    </TouchableOpacity>
+                    {image && <Image source={{ uri: image }} style={styles.imagePreview} />}
+                  </View>
 
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>{Strings.contributionForm.notesLabel}</Text>
-                <TextInput
-                  style={[styles.input, styles.textArea]}
-                  onChangeText={handleChange('observacoes')}
-                  onBlur={handleBlur('observacoes')}
-                  value={values.observacoes}
-                  placeholder={Strings.contributionForm.notesPlaceholder}
-                  placeholderTextColor={Colors.textSecondary}
-                  multiline
-                />
-                {touched.observacoes && errors.observacoes && (
-                  <Text style={styles.errorText}>{errors.observacoes}</Text>
-                )}
-              </View>
+                  {/* Campo Observações */}
+                  <View style={styles.inputGroup}>
+                    <Text style={styles.label}>{Strings.contributionForm.notesLabel}</Text>
+                    <TextInput
+                      style={[styles.input, styles.textArea]}
+                      onChangeText={handleChange('observacoes')}
+                      onBlur={handleBlur('observacoes')}
+                      value={values.observacoes || ''}
+                      placeholder={Strings.contributionForm.notesPlaceholder}
+                      placeholderTextColor={Colors.textSecondary}
+                      multiline
+                    />
+                    {touched.observacoes && errors.observacoes && (
+                      <Text style={styles.errorText}>{errors.observacoes}</Text>
+                    )}
+                  </View>
 
-              <View style={styles.row}>
-                <View style={styles.inputGroupRow}>
-                  <Text style={styles.label}>{Strings.contributionForm.phLabel}</Text>
-                  <TextInput
-                    style={styles.input}
-                    onChangeText={(text) => setFieldValue('ph', text === '' ? null : parseFloat(text))}
-                    onBlur={handleBlur('ph')}
-                    value={values.ph !== null ? values.ph.toString() : ''}
-                    keyboardType="numeric"
-                    placeholder="7.5"
-                    placeholderTextColor={Colors.textSecondary}
-                  />
-                  {touched.ph && errors.ph && (
-                    <Text style={styles.errorText}>{errors.ph}</Text>
-                  )}
-                </View>
+                  {/* Campos de pH e Temperatura */}
+                  <View style={styles.row}>
+                    <View style={styles.inputGroupRow}>
+                      <Text style={styles.label}>{Strings.contributionForm.phLabel}</Text>
+                      <TextInput
+                        style={styles.input}
+                        onChangeText={(text) => setFieldValue('ph', text === '' ? null : parseFloat(text))}
+                        onBlur={handleBlur('ph')}
+                        value={values.ph !== null ? values.ph?.toString() : ''}
+                        keyboardType="numeric"
+                        placeholder="7.5"
+                        placeholderTextColor={Colors.textSecondary}
+                      />
+                      {touched.ph && errors.ph && (
+                        <Text style={styles.errorText}>{errors.ph}</Text>
+                      )}
+                    </View>
+                    <View style={styles.inputGroupRow}>
+                      <Text style={styles.label}>{Strings.contributionForm.tempLabel}</Text>
+                      <TextInput
+                        style={styles.input}
+                        onChangeText={(text) => setFieldValue('temperaturaAgua', text === '' ? null : parseFloat(text))}
+                        onBlur={handleBlur('temperaturaAgua')}
+                        value={values.temperaturaAgua !== null ? values.temperaturaAgua?.toString() : ''}
+                        keyboardType="numeric"
+                        placeholder="25.0"
+                        placeholderTextColor={Colors.textSecondary}
+                      />
+                      {touched.temperaturaAgua && errors.temperaturaAgua && (
+                        <Text style={styles.errorText}>{errors.temperaturaAgua}</Text>
+                      )}
+                    </View>
+                  </View>
 
-                <View style={styles.inputGroupRow}>
-                  <Text style={styles.label}>{Strings.contributionForm.tempLabel}</Text>
-                  <TextInput
-                    style={styles.input}
-                    onChangeText={(text) => setFieldValue('temperaturaAgua', text === '' ? null : parseFloat(text))}
-                    onBlur={handleBlur('temperaturaAgua')}
-                    value={values.temperaturaAgua !== null ? values.temperaturaAgua.toString() : ''}
-                    keyboardType="numeric"
-                    placeholder="25.0"
-                    placeholderTextColor={Colors.textSecondary}
-                  />
-                  {touched.temperaturaAgua && errors.temperaturaAgua && (
-                    <Text style={styles.errorText}>{errors.temperaturaAgua}</Text>
-                  )}
-                </View>
-              </View>
-
-              <TouchableOpacity
-                style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]}
-                onPress={isSubmitting ? undefined : () => handleSubmit()}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <ActivityIndicator color={Colors.textLight} />
-                ) : (
-                  <Text style={styles.submitButtonText}>{Strings.common.submit}</Text>
-                )}
-              </TouchableOpacity>
-            </Card>
-          )}
-        </Formik>
-      </View>
-    </TouchableWithoutFeedback>
+                  {/* Botão de Envio */}
+                  <TouchableOpacity
+                    style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]}
+                    onPress={isSubmitting ? undefined : () => handleSubmit()}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <ActivityIndicator color={Colors.textLight} />
+                    ) : (
+                      <Text style={styles.submitButtonText}>{Strings.common.submit}</Text>
+                    )}
+                  </TouchableOpacity>
+                </Card>
+              )}
+            </Formik>
+          </ScrollView>
+        </View>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
+  keyboardAvoidingView: {
+    flex: 1,
+  },
   container: {
-    padding: 16,
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingVertical: 40,
+    backgroundColor: Colors.background,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  closeButton: {
+    padding: 5,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 40,
   },
   cardContainer: {
     padding: 20,
-    borderRadius: 10,
+    borderRadius: 15,
     width: '100%',
     alignSelf: 'center',
-    marginVertical: 0,
-    marginHorizontal: 0,
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
     color: Colors.textPrimary,
-    textAlign: 'center',
   },
   inputGroup: {
-    marginBottom: 16,
+    marginBottom: 20,
   },
   inputGroupRow: {
     flex: 1,
-    marginHorizontal: 8,
+    marginHorizontal: 5,
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    marginBottom: 10,
   },
   label: {
-    fontSize: 14,
-    fontWeight: 'bold',
+    fontSize: 16,
+    fontWeight: '600',
     color: Colors.textPrimary,
-    marginBottom: 4,
+    marginBottom: 8,
   },
   input: {
     borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.background,
-    borderRadius: 8,
-    padding: 12,
+    borderColor: Colors.divider,
+    backgroundColor: Colors.surface,
+    borderRadius: 10,
+    padding: 15,
     fontSize: 16,
     color: Colors.textPrimary,
   },
   textArea: {
-    height: 100,
+    minHeight: 100,
     textAlignVertical: 'top',
   },
   errorText: {
     color: Colors.error,
-    fontSize: 12,
-    marginTop: 4,
+    fontSize: 13,
+    marginTop: 5,
   },
   submitButton: {
     backgroundColor: Colors.primary,
-    borderRadius: 8,
-    padding: 15,
+    borderRadius: 10,
+    padding: 18,
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: 20,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 8,
   },
   submitButtonDisabled: {
-    backgroundColor: Colors.primary + '80',
+    backgroundColor: Colors.divider,
+    shadowOpacity: 0,
+    elevation: 0,
   },
   submitButtonText: {
     color: Colors.textLight,
     fontWeight: 'bold',
-    fontSize: 16,
+    fontSize: 18,
   },
   imagePickerContainer: {
     alignItems: 'center',
@@ -315,20 +344,29 @@ const styles = StyleSheet.create({
   imageButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.border,
-    padding: 10,
-    borderRadius: 8,
+    backgroundColor: Colors.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 4,
   },
   imageButtonText: {
-    marginLeft: 8,
-    color: Colors.primary,
+    marginLeft: 10,
+    color: Colors.textLight,
     fontWeight: 'bold',
+    fontSize: 16,
   },
   imagePreview: {
-    width: 150,
-    height: 150,
-    borderRadius: 8,
-    marginTop: 10,
+    width: 200,
+    height: 200,
+    borderRadius: 10,
+    marginTop: 15,
+    borderColor: Colors.border,
+    borderWidth: 1,
   },
 });
 

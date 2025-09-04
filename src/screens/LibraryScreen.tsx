@@ -1,21 +1,28 @@
-import React, { useState } from 'react';
+// src/screens/LibraryScreen.tsx
+
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
+  ActivityIndicator,
   FlatList,
+  Keyboard,
+  StyleSheet,
+  Text,
   TextInput,
   TouchableOpacity,
-  Keyboard,
   TouchableWithoutFeedback,
+  View,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Card from '../components/common/Card';
 import { Colors } from '../constants/colors';
 import { Strings } from '../constants/strings';
-import { Bioindicador } from '../types/common';
-import Card from '../components/common/Card';
+import { IBioindicador } from '../types/common';
+import { LibraryStackParamList } from '../types/navigation';
 
-const mockBioindicadores: Bioindicador[] = [
+// Mock de dados para simular uma API. Substitua pela chamada da sua API.
+const mockBioindicadores: IBioindicador[] = [
   {
     id: '1',
     nomePopular: 'Alga Marrom',
@@ -42,27 +49,60 @@ const mockBioindicadores: Bioindicador[] = [
   },
 ];
 
+type LibraryScreenNavigationProp = StackNavigationProp<LibraryStackParamList, 'Library'>;
+
+const BioindicadorItem: React.FC<{ item: IBioindicador; onPress: () => void }> = ({ item, onPress }) => (
+  <TouchableOpacity activeOpacity={0.7} onPress={onPress}>
+    <Card containerStyle={styles.itemCard}>
+      <Text style={styles.itemTitle}>{item.nomePopular}</Text>
+      <Text style={styles.itemSubtitle}>{item.nomeCientifico}</Text>
+    </Card>
+  </TouchableOpacity>
+);
+
 const LibraryScreen: React.FC = () => {
   const [searchText, setSearchText] = useState('');
-  
-  const filteredBioindicadores = mockBioindicadores.filter((item) =>
+  const [bioindicadores, setBioindicadores] = useState<IBioindicador[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const navigation = useNavigation<LibraryScreenNavigationProp>();
+
+  // UseEffect para simular a busca de dados da API
+  useEffect(() => {
+    const fetchBioindicadores = async () => {
+      // Simulação de delay da API
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setBioindicadores(mockBioindicadores);
+      setIsLoading(false);
+    };
+
+    fetchBioindicadores();
+  }, []);
+
+  const filteredBioindicadores = bioindicadores.filter((item) =>
     item.nomePopular.toLowerCase().includes(searchText.toLowerCase()) ||
     item.nomeCientifico.toLowerCase().includes(searchText.toLowerCase())
   );
 
-  const renderItem = ({ item }: { item: Bioindicador }) => (
-    <TouchableOpacity
-      activeOpacity={0.7}
-      onPress={() => {
-        // Lógica de navegação para a tela de detalhes do bioindicador
-        console.log('Navegar para detalhes:', item.nomePopular);
-      }}
-    >
-      <Card>
-        <Text style={styles.itemTitle}>{item.nomePopular}</Text>
-        <Text style={styles.itemSubtitle}>{item.nomeCientifico}</Text>
-      </Card>
-    </TouchableOpacity>
+  const handlePressItem = (item: IBioindicador) => {
+    // A tela de destino precisa estar definida no seu LibraryStack.
+    // Ex: navigation.navigate('BioindicadorDetails', { bioindicador: item });
+    console.log('Navegar para detalhes:', item.nomePopular);
+  };
+
+  if (isLoading) {
+    return (
+      <View style={[styles.container, styles.loadingContainer]}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+        <Text style={styles.loadingText}>Carregando Bioindicadores...</Text>
+      </View>
+    );
+  }
+
+  const ListEmptyComponent = () => (
+    <View style={styles.emptyContainer}>
+      <Ionicons name="alert-circle-outline" size={50} color={Colors.textSecondary} />
+      <Text style={styles.emptyText}>Nenhum bioindicador encontrado.</Text>
+    </View>
   );
 
   return (
@@ -83,9 +123,12 @@ const LibraryScreen: React.FC = () => {
         </View>
         <FlatList
           data={filteredBioindicadores}
-          renderItem={renderItem}
+          renderItem={({ item }) => (
+            <BioindicadorItem item={item} onPress={() => handlePressItem(item)} />
+          )}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContainer}
+          ListEmptyComponent={ListEmptyComponent}
         />
       </View>
     </TouchableWithoutFeedback>
@@ -134,9 +177,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.textPrimary,
   },
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 10,
+    color: Colors.textSecondary,
+    fontSize: 16,
+  },
   listContainer: {
     paddingVertical: 8,
-    paddingHorizontal: 0,
+    paddingHorizontal: 16,
+  },
+  itemCard: {
+    padding: 16,
+    marginBottom: 8,
   },
   itemTitle: {
     fontSize: 16,
@@ -147,6 +203,19 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.textSecondary,
     marginTop: 4,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    marginTop: 50,
+  },
+  emptyText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: Colors.textSecondary,
+    textAlign: 'center',
   },
 });
 

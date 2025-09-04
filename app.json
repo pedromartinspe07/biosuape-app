@@ -1,29 +1,35 @@
 {
   "expo": {
-    "name": "Bioindicadores Suape",
-    "slug": "biosuape-app",
+    "name": "Suape Conecta",
+    "slug": "suape-conecta-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "biosuapeapp",
+    "scheme": "suapeconecta",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "owner": "seu-usuario-do-expo",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.bio.suape",
+      "bundleIdentifier": "com.suapeconecta.app",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "This app needs access to your location to report occurrences."
+        "NSLocationWhenInUseUsageDescription": "Precisamos de sua localização para que você possa registrar a coordenada de suas descobertas de bioindicadores e contribuir com a ciência.",
+        "NSCameraUsageDescription": "Para adicionar fotos às suas descobertas, este aplicativo precisa de acesso à sua câmera.",
+        "NSPhotoLibraryUsageDescription": "Para adicionar fotos existentes às suas descobertas, este aplicativo precisa de acesso à sua galeria de fotos."
       }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#1A1A1D"
       },
-      "package": "com.bio.suape",
+      "package": "com.suapeconecta.app",
       "permissions": [
         "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.ACCESS_FINE_LOCATION"
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
       ],
       "edgeToEdgeEnabled": true
     },
@@ -37,20 +43,23 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
+          "image": "./assets/images/splash.png",
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#1A1A1D"
         }
       ],
       "expo-sqlite",
-      "expo-font"
+      "expo-font",
+      "expo-secure-store",
+      "expo-image-picker"
     ],
     "experiments": {
       "typedRoutes": true
     },
     "extra": {
-      "router": {},
+      "router": {
+        "origin": false
+      },
       "eas": {
         "projectId": "80e185bb-f16f-4d48-9a9f-8387696abc6e"
       }

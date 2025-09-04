@@ -1,58 +1,77 @@
-import React from 'react';
-import { createStackNavigator } from '@react-navigation/stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+// src/navigation/AppNavigator.tsx
+
 import { Ionicons } from '@expo/vector-icons';
-import { Strings } from '../constants/strings';
-import { Colors } from '../constants/colors';
-import { RootStackParamList, AppTabParamList } from '../types/navigation';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import React from 'react';
+import { Colors } from '../constants/colors';
+import { Strings } from '../constants/strings';
+import { AppTabParamList, LibraryStackParamList, RootStackParamList } from '../types/navigation';
 
 // Importe as telas
-import SplashScreen from '../screens/SplashScreen';
 import AuthScreen from '../screens/AuthScreen';
-import MapScreen from '../screens/MapScreen';
 import LibraryScreen from '../screens/LibraryScreen';
-import ReportsScreen from '../screens/ReportsScreen';
+import MapScreen from '../screens/MapScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import ReportsScreen from '../screens/ReportsScreen';
+import SplashScreen from '../screens/SplashScreen';
 
-const Stack = createStackNavigator<RootStackParamList>();
-const Tab = createBottomTabNavigator<AppTabParamList>();
-const LibraryStack = createNativeStackNavigator();
+// Criação dos navegadores
+const RootStack = createNativeStackNavigator<RootStackParamList>();
+const AppTabs = createBottomTabNavigator<AppTabParamList>();
+const LibraryStack = createNativeStackNavigator<LibraryStackParamList>();
 
-// Navegador de pilha para a tela de Biblioteca
+/**
+ * Navegador de pilha para as telas da seção de Biblioteca.
+ * Isso permite a navegação entre a tela principal da biblioteca e outras telas relacionadas (ex: detalhes).
+ */
 const LibraryStackNavigator = () => {
   return (
-    <LibraryStack.Navigator>
+    <LibraryStack.Navigator screenOptions={{ headerShown: false }}>
       <LibraryStack.Screen
-        name={Strings.navigation.library}
+        name="Library" // Nome único para a tela principal da biblioteca
         component={LibraryScreen}
-        options={{ headerShown: false }}
       />
-      {/* Adicione outras telas aqui se necessário */}
+      {/* Exemplo de como adicionar uma tela de detalhes: */}
+      {/* <LibraryStack.Screen 
+        name="LibraryDetails" 
+        component={LibraryDetailsScreen}
+      /> */}
     </LibraryStack.Navigator>
   );
 };
 
-// Navegador de abas principal
+/**
+ * Navegador de abas para as principais telas da aplicação.
+ * Exibe ícones na barra inferior para alternar entre as funcionalidades.
+ */
 const MainTabs = () => {
   return (
-    <Tab.Navigator
+    <AppTabs.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarIcon: ({ focused, color, size }) => {
-          let iconName: string;
+          let iconName: keyof typeof Ionicons.glyphMap;
 
-          if (route.name === Strings.navigation.map) {
-            iconName = focused ? 'map' : 'map-outline';
-          } else if (route.name === Strings.navigation.library) {
-            iconName = focused ? 'book' : 'book-outline';
-          } else if (route.name === Strings.navigation.reports) {
-            iconName = focused ? 'bar-chart' : 'bar-chart-outline';
-          } else { // O caso padrão para a rota de perfil
-            iconName = focused ? 'person' : 'person-outline';
+          switch (route.name) {
+            case Strings.navigation.map:
+              iconName = focused ? 'map' : 'map-outline';
+              break;
+            case Strings.navigation.library:
+              iconName = focused ? 'book' : 'book-outline';
+              break;
+            case Strings.navigation.reports:
+              iconName = focused ? 'bar-chart' : 'bar-chart-outline';
+              break;
+            case Strings.navigation.profile:
+              iconName = focused ? 'person' : 'person-outline';
+              break;
+            default:
+              iconName = 'ellipse-outline'; // Ícone padrão para evitar erros
+              break;
           }
 
-          return <Ionicons name={iconName as any} size={size} color={color} />;
+          return <Ionicons name={iconName} size={size} color={color} />;
         },
         tabBarActiveTintColor: Colors.primary,
         tabBarInactiveTintColor: Colors.textSecondary,
@@ -67,24 +86,28 @@ const MainTabs = () => {
         },
       })}
     >
-      <Tab.Screen name={Strings.navigation.map} component={MapScreen} />
-      <Tab.Screen name={Strings.navigation.library} component={LibraryStackNavigator} />
-      <Tab.Screen name={Strings.navigation.reports} component={ReportsScreen} />
-      <Tab.Screen name={Strings.navigation.profile} component={ProfileScreen} />
-    </Tab.Navigator>
+      <AppTabs.Screen name={Strings.navigation.map} component={MapScreen} />
+      <AppTabs.Screen name={Strings.navigation.library} component={LibraryStackNavigator} />
+      <AppTabs.Screen name={Strings.navigation.reports} component={ReportsScreen} />
+      <AppTabs.Screen name={Strings.navigation.profile} component={ProfileScreen} />
+    </AppTabs.Navigator>
   );
 };
 
+/**
+ * Navegador de pilha principal que gerencia o fluxo de autenticação e navegação da aplicação.
+ * A tela 'AppStack' é o navegador de abas que só é acessado após a autenticação.
+ */
 const AppNavigator: React.FC = () => {
   return (
-    <Stack.Navigator
+    <RootStack.Navigator
       initialRouteName="Splash"
       screenOptions={{ headerShown: false }}
     >
-      <Stack.Screen name="Splash" component={SplashScreen} />
-      <Stack.Screen name="Auth" component={AuthScreen} />
-      <Stack.Screen name="AppStack" component={MainTabs} />
-    </Stack.Navigator>
+      <RootStack.Screen name="Splash" component={SplashScreen} />
+      <RootStack.Screen name="Auth" component={AuthScreen} />
+      <RootStack.Screen name="AppStack" component={MainTabs} />
+    </RootStack.Navigator>
   );
 };
 

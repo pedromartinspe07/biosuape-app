@@ -1,75 +1,76 @@
+// src/constants/colors.ts
+
 /**
  * @fileoverview Paleta de cores e constantes para uso em toda a aplicação.
- * Organizado em uma paleta base para consistência e cores semânticas para uso em componentes.
+ * Projetado para um design moderno e vibrante, com foco em uma experiência de usuário intuitiva.
  */
 
-// Paleta de cores base. Segue uma convenção de nomenclatura comum
-// onde o número indica a luminosidade da cor (ex: 500 é o tom principal).
+// Paleta de cores base. A luminosidade é indicada pelo número.
 export const Palette = {
-  // Cores de marca (neutras)
+  // Cores de marca (neutras) - mais quentes para maior suavidade
   neutral: {
-    50: '#F9FAFB',
-    100: '#F3F4F6',
-    200: '#E5E7EB',
-    300: '#D1D5DB',
-    400: '#9CA3AF',
-    500: '#6B7280',
-    600: '#4B5563',
-    700: '#374151',
-    800: '#1F2937',
-    900: '#111827',
+    50: '#F5F5F7',
+    100: '#EAEAEB',
+    200: '#D6D6D7',
+    300: '#C2C2C4',
+    400: '#A3A3A6',
+    500: '#75757A',
+    600: '#525256',
+    700: '#3D3D40',
+    800: '#29292D',
+    900: '#1A1A1D',
   },
-  // Cores primárias da marca
-  blue: {
-    50: '#EFF6FF',
-    100: '#DBEAFE',
-    200: '#BFDBFE',
-    300: '#93C5FD',
-    400: '#60A5FA',
-    500: '#3B82F6', // Tom principal
-    600: '#2563EB',
-    700: '#1D4ED8',
-    800: '#1E40AF',
-    900: '#1E3A8A',
+  // Cor primária - um vibrante azul-petróleo que evoca o mar
+  teal: {
+    50: '#E0F7F9',
+    100: '#B2EBF2',
+    200: '#80DEEA',
+    300: '#4DD0E1',
+    400: '#26C6DA',
+    500: '#00BCD4', // Tom principal e mais vibrante
+    600: '#00ACC1',
+    700: '#0097A7',
+    800: '#00838F',
+    900: '#006064',
   },
-  // Cores de status de sucesso
+  // Cor de destaque - um verde mais orgânico
   green: {
-    50: '#ECFDF5',
-    100: '#D1FAE5',
-    200: '#A7F3D0',
-    300: '#6EE7B7',
-    400: '#34D399',
-    500: '#10B981', // Tom principal
-    600: '#059669',
-    700: '#047857',
-    800: '#065F46',
-    900: '#064E3B',
+    50: '#E8F5E9',
+    100: '#C8E6C9',
+    200: '#A5D6A7',
+    300: '#81C784',
+    400: '#66BB6A',
+    500: '#4CAF50', // Tom principal
+    600: '#43A047',
+    700: '#388E3C',
+    800: '#2E7D32',
+    900: '#1B5E20',
   },
-  // Cores de status de erro
+  // Cor de erro - um vermelho mais profundo e forte
   red: {
-    50: '#FEF2F2',
-    100: '#FEE2E2',
-    200: '#FECACA',
-    300: '#FCA5A5',
-    400: '#F87171',
-    500: '#EF4444', // Tom principal
-    600: '#DC2626',
-    700: '#B91C1C',
-    800: '#991B1B',
-    900: '#7F1D1D',
+    50: '#FFEBEE',
+    100: '#FFCDD2',
+    200: '#EF9A9A',
+    300: '#E57373',
+    400: '#EF5350',
+    500: '#F44336', // Tom principal
+    600: '#E53935',
+    700: '#D32F2F',
+    800: '#C62828',
+    900: '#B71C1C',
   },
-  // Cores de status de aviso
+  // Cor de aviso - um amarelo mais intenso
   yellow: {
-    50: '#FFFBEB',
-    100: '#FEF3C7',
-    200: '#FDE68A',
-    300: '#FCD34D',
-    400: '#FBBF24',
-    500: '#F59E0B', // Tom principal
-    600: '#D97706',
-    700: '#B45309',
-    800: '#92400E',
-    900: '#78350F',
+    50: '#FFFDE7',
+    100: '#FFF9C4',
+    200: '#FFF59D',
+    300: '#FFF176',
+    400: '#FFEE58',
+    500: '#FFEB3B', // Tom principal
+    600: '#FDD835',
+    700: '#FBC02D',
+    800: '#F9A825',
+    900: '#F57F17',
   },
   white: '#FFFFFF',
   black: '#000000',
@@ -78,28 +79,30 @@ export const Palette = {
 // Cores do tema, usando nomes semânticos para clareza
 export const Colors = {
   // Cores principais
-  primary: Palette.blue[500],
-  primaryDark: Palette.blue[700],
-  accent: Palette.blue[400],
-
-  // Fundo e superfícies
-  background: Palette.neutral[50], // Fundo de toda a tela
-  surface: Palette.white, // Fundo de cards, modais
-  border: Palette.neutral[200], // Borda de inputs e separadores
+  primary: Palette.teal[500],
+  primaryDark: Palette.teal[700],
+  accent: Palette.green[500],
+  
+  // Cores de fundo
+  background: Palette.neutral[50], // Fundo de toda a tela, claro e suave
+  surface: Palette.white, // Fundo de cards, modais, etc., para contraste
+  
+  // Cores de borda e separadores
+  border: Palette.neutral[200],
   divider: Palette.neutral[300],
 
-  // Cores de texto
-  textPrimary: Palette.neutral[900], // Texto principal
-  textSecondary: Palette.neutral[600], // Texto secundário (legibilidade menor)
+  // Cores de texto para garantir alta legibilidade
+  textPrimary: Palette.neutral[900], // Para títulos e textos importantes
+  textSecondary: Palette.neutral[600], // Para legendas, textos de suporte
   textLight: Palette.white, // Texto sobre fundos escuros
-  textLink: Palette.blue[600],
+  textLink: Palette.teal[700],
 
-  // Cores de feedback
+  // Cores de feedback e status
   success: Palette.green[500],
   successDark: Palette.green[700],
   error: Palette.red[500],
   errorDark: Palette.red[700],
   warning: Palette.yellow[500],
   warningDark: Palette.yellow[700],
-  info: Palette.blue[400],
+  info: Palette.teal[400],
 };

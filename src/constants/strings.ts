@@ -1,24 +1,26 @@
+// src/constants/strings.ts
+
 /**
  * @fileoverview Constantes de strings para a aplicação.
- * Organizado por contexto para facilitar a gestão e a tradução futura.
+ * Adaptado para um tom de voz amigável, motivacional e focado na experiência do usuário.
  */
 
 export const Strings = {
-  // Strings globais usadas em múltiplos lugares.
+  // Strings globais para o app
   common: {
     loading: 'Carregando...',
-    submit: 'Enviar',
+    submit: 'Compartilhar',
     cancel: 'Cancelar',
     save: 'Salvar',
     edit: 'Editar',
     delete: 'Excluir',
-    success: 'Sucesso',
-    error: 'Erro',
-    ok: 'OK',
-    appName: 'Bioindicadores Suape',
+    success: 'Sucesso!',
+    error: 'Ops, algo deu errado.',
+    ok: 'Entendido',
+    appName: 'Suape Conecta',
   },
 
-  // Rótulos para a navegação principal da aplicação.
+  // Rótulos da navegação principal
   navigation: {
     map: 'Mapa',
     library: 'Biblioteca',
@@ -26,70 +28,70 @@ export const Strings = {
     profile: 'Perfil',
   },
 
-  // Strings específicas da tela de Mapa.
+  // Conteúdo para a tela de Mapa
   mapScreen: {
-    title: 'Mapa Interativo',
-    addOccurrenceAlertTitle: 'Adicionar Ocorrência',
-    addOccurrenceAlertMessage: 'Deseja adicionar uma nova ocorrência neste local?',
-    addOccurrenceButton: 'Adicionar Ocorrência',
-    locationPermissionTitle: 'Permissão de Localização',
-    locationPermissionMessage: 'Precisamos de sua localização para adicionar uma ocorrência. Por favor, habilite nas configurações.',
+    title: 'Seu Mapa Interativo',
+    addOccurrenceAlertTitle: 'Compartilhar Descoberta',
+    addOccurrenceAlertMessage: 'Quer registrar uma nova ocorrência neste local?',
+    addOccurrenceButton: 'Registrar Ocorrência',
+    locationPermissionTitle: 'Localização Necessária',
+    locationPermissionMessage: 'Para registrar sua descoberta, precisamos de acesso à sua localização. Ative nas configurações do dispositivo.',
   },
 
-  // Strings específicas da tela da Biblioteca.
+  // Conteúdo para a tela da Biblioteca
   libraryScreen: {
-    title: 'Biblioteca de Bioindicadores',
-    searchPlaceholder: 'Buscar espécie...',
-    noResults: 'Nenhum resultado encontrado.',
+    title: 'Guia de Bioindicadores',
+    searchPlaceholder: 'Buscar espécies...',
+    noResults: 'Não encontramos nenhum bioindicador com esse nome.',
     detailsTitle: 'Detalhes da Espécie',
   },
 
-  // Strings específicas da tela de Relatórios.
+  // Conteúdo para a tela de Relatórios
   reportsScreen: {
-    title: 'Relatórios e Análises',
-    noData: 'Nenhum dado disponível para gerar relatórios.',
+    title: 'Relatórios e Impactos',
+    noData: 'Ainda não há dados suficientes para gerar um relatório.',
     generateReportButton: 'Gerar Relatório',
   },
 
-  // Strings específicas do formulário de Contribuição.
+  // Conteúdo para o formulário de Contribuição
   contributionForm: {
-    title: 'Adicionar Nova Ocorrência',
-    speciesLabel: 'Nome da Espécie:',
-    notesLabel: 'Observações:',
-    phLabel: 'pH:',
-    tempLabel: 'Temperatura (°C):',
+    title: 'Nova Descoberta',
+    speciesLabel: 'Qual espécie você encontrou?',
+    notesLabel: 'Suas observações:',
+    phLabel: 'pH da água:',
+    tempLabel: 'Temperatura da água (°C):',
     speciesPlaceholder: 'Ex: Alga Vermelha',
-    notesPlaceholder: 'Detalhes sobre o organismo...',
-    submitting: 'Enviando...',
-    locationLabel: 'Localização:',
-    gettingLocation: 'Obtendo...',
+    notesPlaceholder: 'Detalhes sobre a espécie e o ambiente...',
+    submitting: 'Registrando sua descoberta...',
+    locationLabel: 'Localização atual:',
+    gettingLocation: 'Obtendo sua localização...',
     pickImage: 'Adicionar Foto',
   },
-  
-  // Strings específicas de autenticação (login e cadastro).
+
+  // Conteúdo para as telas de Autenticação
   auth: {
-    loginTitle: 'Entrar',
-    registerTitle: 'Criar Conta',
-    emailLabel: 'E-mail:',
-    emailPlaceholder: 'Digite seu e-mail',
-    usernameLabel: 'Nome de Usuário:',
-    usernamePlaceholder: 'Digite seu nome de usuário',
-    passwordLabel: 'Senha:',
-    passwordPlaceholder: 'Digite sua senha',
-    loginButton: 'Login',
-    registerButton: 'Cadastrar',
-    noAccount: 'Não tem uma conta? Crie uma',
-    hasAccount: 'Já tem uma conta? Faça login',
+    loginTitle: 'Bem-vindo de volta!',
+    registerTitle: 'Junte-se a nós!',
+    emailLabel: 'Seu e-mail:',
+    emailPlaceholder: 'exemplo@email.com',
+    usernameLabel: 'Seu nome de usuário:',
+    usernamePlaceholder: 'Seu nome para o app',
+    passwordLabel: 'Sua senha:',
+    passwordPlaceholder: 'Crie uma senha segura',
+    loginButton: 'Entrar',
+    registerButton: 'Criar Minha Conta',
+    noAccount: 'Não tem uma conta? Cadastre-se agora',
+    hasAccount: 'Já tem uma conta? Fazer login',
   },
 
-  // Mensagens de alerta e feedback.
+  // Mensagens de alerta e feedback
   alerts: {
-    successTitle: 'Dados enviados!',
-    successMessage: 'Sua contribuição foi registrada com sucesso.',
-    errorTitle: 'Falha no envio',
-    errorMessage: 'Ocorreu um erro ao enviar os dados. Tente novamente.',
-    speciesRequired: 'O nome da espécie é obrigatório.',
-    locationDenied: 'Permissão de localização negada. Não é possível enviar a contribuição.',
-    imagePermissionDenied: 'Permissão para acessar a galeria de fotos negada.',
+    successTitle: 'Descoberta Registrada!',
+    successMessage: 'Obrigado por sua contribuição! Você está ajudando a ciência.',
+    errorTitle: 'Falha ao Registrar',
+    errorMessage: 'Não conseguimos enviar sua contribuição. Verifique sua conexão e tente novamente.',
+    speciesRequired: 'Por favor, selecione ou digite a espécie.',
+    locationDenied: 'Não foi possível obter sua localização. Por favor, habilite o GPS.',
+    imagePermissionDenied: 'Permissão para acessar a galeria negada.',
   },
 };

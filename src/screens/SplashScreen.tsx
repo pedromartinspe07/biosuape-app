@@ -1,32 +1,33 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Image, ActivityIndicator } from 'react-native';
+// src/screens/SplashScreen.tsx
+
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import React, { useEffect } from 'react';
+import { ActivityIndicator, Image, StyleSheet, Text, View } from 'react-native';
 import { Colors } from '../constants/colors';
 import { Strings } from '../constants/strings';
-import { checkAuthStatus } from '../utils/authHelper'; // Função que você precisará criar
+import { RootStackParamList } from '../types/navigation'; // Tipagem das rotas
+import { checkAuthStatus } from '../utils/authHelper';
 
-type SplashScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Splash'>; // 'Splash' é o nome da rota na navigation
-type RootStackParamList = {
-    Splash: undefined;
-    AppStack: undefined;
-    Auth: undefined;
-};
+type SplashScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Splash'>;
 
 const SplashScreen: React.FC = () => {
     const navigation = useNavigation<SplashScreenNavigationProp>();
 
     useEffect(() => {
         const checkAuth = async () => {
-            // Simulação de tempo de carregamento
+            // Simulação de tempo de carregamento para uma melhor UX
             await new Promise(resolve => setTimeout(resolve, 2000));
 
-            const isAuthenticated = await checkAuthStatus(); // Verifica se o usuário tem um token válido
+            // Verificação do status de autenticação
+            const isAuthenticated = await checkAuthStatus();
 
             if (isAuthenticated) {
-                navigation.replace('AppStack', {} as any);
+                // Navega para o AppStack se o usuário estiver autenticado
+                navigation.replace('AppStack' as any);
             } else {
-                navigation.replace('Auth', {} as any);
+                // Navega para a tela de autenticação
+                navigation.replace('Auth');
             }
         };
 
@@ -35,9 +36,17 @@ const SplashScreen: React.FC = () => {
 
     return (
         <View style={styles.container}>
-            <Image source={require('../assets/images/favicon.png')} style={styles.logo} />
+            {/* O ícone da sua aplicação */}
+            <Image 
+                source={require('../assets/images/favicon.png')} 
+                style={styles.logo} 
+            />
             <Text style={styles.title}>{Strings.common.appName}</Text>
-            <ActivityIndicator size="large" color={Colors.primary} style={styles.loading} />
+            <ActivityIndicator 
+                size="large" 
+                color={Colors.primary} 
+                style={styles.loading} 
+            />
         </View>
     );
 };

@@ -1,14 +1,14 @@
 // src/components/common/Card.tsx
 
 import React from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  ViewStyle, 
-  TextStyle, 
-  TouchableOpacity, 
-  GestureResponderEvent 
+import {
+  GestureResponderEvent,
+  StyleSheet,
+  Text,
+  TextStyle,
+  TouchableOpacity,
+  View,
+  ViewStyle
 } from 'react-native';
 import { Colors } from '../../constants/colors';
 
@@ -20,8 +20,8 @@ interface CardProps {
   titleStyle?: TextStyle;
   descriptionStyle?: TextStyle;
   /**
-   * Função para lidar com o evento de clique no cartão.
-   * Se esta prop for fornecida, o componente será renderizado como um TouchableOpacity.
+   * Função para lidar com o evento de clique.
+   * Se fornecida, o Card será renderizado como um componente clicável.
    */
   onPress?: (event: GestureResponderEvent) => void;
 }
@@ -65,26 +65,28 @@ const Card: React.FC<CardProps> = ({
 const styles = StyleSheet.create({
   card: {
     backgroundColor: Colors.surface,
-    borderRadius: 12,
+    borderRadius: 15,
     padding: 20,
-    marginVertical: 8,
+    marginVertical: 10,
     marginHorizontal: 16,
-    shadowColor: Colors.textPrimary,
-    shadowOffset: { width: 0, height: 4 },
+    shadowColor: Colors.textPrimary, // Sombra mais suave
+    shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 3, // Elevação para Android
+    shadowRadius: 10,
+    elevation: 5, // Elevação para Android
+    borderWidth: 1,
+    borderColor: Colors.border, // Borda sutil para dar mais destaque
   },
   title: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     color: Colors.textPrimary,
-    marginBottom: 4,
+    marginBottom: 6,
   },
   description: {
     fontSize: 14,
     color: Colors.textSecondary,
-    marginBottom: 8,
+    marginBottom: 10,
   },
 });
 

@@ -1,21 +1,21 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+// src/screens/AuthScreen.tsx
+
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Formik } from 'formik';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import * as Yup from 'yup';
+import Card from '../components/common/Card';
+import InputField from '../components/common/InputField';
+import Messages from '../components/common/Messages';
 import { Colors } from '../constants/colors';
 import { Strings } from '../constants/strings';
-import Card from '../components/common/Card';
-import { login, register } from '../services/authService'; // Você precisará criar este serviço
-import InputField from '../components/common/InputField'; // Componente de input reutilizável
+import { login, register } from '../services/authService';
+import { IAuthFormInput, IMessage } from '../types/common';
+import { RootStackParamList } from '../types/navigation';
 
-type AuthScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Auth'>; // 'Auth' é o nome da rota na navigation
-
-type RootStackParamList = {
-    Auth: undefined;
-    AppStack: undefined;
-};
+type AuthScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Auth'>;
 
 const loginSchema = Yup.object().shape({
     email: Yup.string().email('E-mail inválido').required('E-mail é obrigatório'),
@@ -30,28 +30,41 @@ const registerSchema = Yup.object().shape({
 
 const AuthScreen: React.FC = () => {
     const [isLogin, setIsLogin] = useState(true);
+    const [message, setMessage] = useState<IMessage | null>(null);
     const navigation = useNavigation<AuthScreenNavigationProp>();
 
-    const handleLogin = async (values: any, { setSubmitting }: any) => {
+    useEffect(() => {
+        if (message) {
+            const timer = setTimeout(() => {
+                setMessage(null);
+            }, 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [message]);
+
+    const handleLogin = async (values: IAuthFormInput, { setSubmitting }: any) => {
+        setSubmitting(true);
         try {
             await login(values.email, values.password);
-            Alert.alert(Strings.alerts.successTitle, 'Login realizado com sucesso!');
-            navigation.replace('AppStack', {} as any);
+            setMessage({ text: 'Login realizado com sucesso!', type: 'success' });
+            navigation.replace('AppStack' as any);
         } catch (error: any) {
-            Alert.alert(Strings.alerts.errorTitle, error.message || 'Falha no login. Verifique suas credenciais.');
+            setMessage({ text: error.message || 'Falha no login. Verifique suas credenciais.', type: 'error' });
         } finally {
             setSubmitting(false);
         }
     };
 
-    const handleRegister = async (values: any, { setSubmitting }: any) => {
+    const handleRegister = async (values: IAuthFormInput, { setSubmitting }: any) => {
+        setSubmitting(true);
         try {
-            await register(values.username, values.email, values.password);
-            Alert.alert(Strings.alerts.successTitle, 'Cadastro realizado com sucesso! Faça login para continuar.');
-            setIsLogin(true); // Redireciona para a tela de login
-            navigation.replace('Auth', {} as any);
+            if (values.username) {
+                await register(values.username, values.email, values.password);
+                setMessage({ text: 'Cadastro realizado com sucesso! Faça login para continuar.', type: 'success' });
+                setIsLogin(true);
+            }
         } catch (error: any) {
-            Alert.alert(Strings.alerts.errorTitle, error.message || 'Falha no cadastro. Tente novamente.');
+            setMessage({ text: error.message || 'Falha no cadastro. Tente novamente.', type: 'error' });
         } finally {
             setSubmitting(false);
         }
@@ -59,13 +72,17 @@ const AuthScreen: React.FC = () => {
 
     const toggleAuthMode = () => {
         setIsLogin(!isLogin);
+        setMessage(null);
     };
+
+    const initialValues = isLogin ? { email: '', password: '' } : { username: '', email: '', password: '' };
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>{isLogin ? Strings.auth.loginTitle : Strings.auth.registerTitle}</Text>  
+            <Text style={styles.title}>{isLogin ? Strings.auth.loginTitle : Strings.auth.registerTitle}</Text>
+            {message && <Messages text={message.text} type={message.type} />}
             <Formik
-                initialValues={isLogin ? { email: '', password: '' } : { username: '', email: '', password: '' }}
+                initialValues={initialValues}
                 validationSchema={isLogin ? loginSchema : registerSchema}
                 onSubmit={isLogin ? handleLogin : handleRegister}
             >
@@ -78,7 +95,7 @@ const AuthScreen: React.FC = () => {
                                 value={values.username}
                                 onChangeText={handleChange('username')}
                                 onBlur={handleBlur('username')}
-                                error={touched.username && errors.username}
+                                error={touched.username ? errors.username : undefined}
                             />
                         )}
                         <InputField
@@ -87,7 +104,7 @@ const AuthScreen: React.FC = () => {
                             value={values.email}
                             onChangeText={handleChange('email')}
                             onBlur={handleBlur('email')}
-                            error={touched.email && errors.email}
+                            error={touched.email ? errors.email : undefined}
                             keyboardType="email-address"
                         />
                         <InputField
@@ -96,7 +113,7 @@ const AuthScreen: React.FC = () => {
                             value={values.password}
                             onChangeText={handleChange('password')}
                             onBlur={handleBlur('password')}
-                            error={touched.password && errors.password}
+                            error={touched.password ? errors.password : undefined}
                             secureTextEntry
                         />
                         <TouchableOpacity

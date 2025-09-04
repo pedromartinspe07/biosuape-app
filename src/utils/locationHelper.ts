@@ -2,7 +2,7 @@
 
 import * as Location from 'expo-location';
 
-// --- Tipos para o helper de localização ---
+// --- Tipos e Erros para o helper de localização ---
 
 /**
  * Define a estrutura de um objeto de coordenadas geográficas.
@@ -13,62 +13,99 @@ export interface Coords {
 }
 
 /**
- * Define a estrutura do objeto de retorno da função de permissão.
+ * Códigos de erro específicos para a lógica de localização.
  */
-interface PermissionResponse {
-  granted: boolean;
-  error: string | null;
+export enum LocationErrorCode {
+  PermissionDenied = 'PERMISSION_DENIED',
+  RequestFailed = 'REQUEST_FAILED',
+  LocationUnavailable = 'LOCATION_UNAVAILABLE',
+}
+
+/**
+ * Classe de erro personalizada para falhas de localização.
+ */
+export class LocationError extends Error {
+  code: LocationErrorCode;
+
+  constructor(message: string, code: LocationErrorCode) {
+    super(message);
+    this.name = 'LocationError';
+    this.code = code;
+  }
 }
 
 // --- Funções do helper de localização ---
 
 /**
  * Solicita permissão de acesso à localização do usuário em primeiro plano.
- * Retorna um objeto com o status da permissão e a mensagem de erro, se houver.
- * @returns {Promise<PermissionResponse>} Um objeto com o status da permissão.
+ * @returns {Promise<boolean>} Retorna true se a permissão for concedida, ou lança um LocationError.
  */
-export const requestLocationPermission = async (): Promise<PermissionResponse> => {
+export const requestLocationPermission = async (): Promise<boolean> => {
   try {
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
-      return {
-        granted: false,
-        error: 'Permissão para acessar a localização foi negada. Por favor, habilite-a nas configurações do seu dispositivo.',
-      };
+      throw new LocationError(
+        'Permissão para acessar a localização foi negada. Por favor, habilite-a nas configurações.',
+        LocationErrorCode.PermissionDenied
+      );
     }
-    return {
-      granted: true,
-      error: null,
-    };
+    return true;
   } catch (err) {
+    if (err instanceof LocationError) {
+      throw err; // Propaga nosso erro personalizado
+    }
     console.error('Erro ao solicitar permissão de localização:', err);
-    return {
-      granted: false,
-      error: 'Não foi possível solicitar a permissão de localização.',
-    };
+    throw new LocationError(
+      'Não foi possível solicitar a permissão de localização.',
+      LocationErrorCode.RequestFailed
+    );
   }
 };
 
 /**
  * Obtém a localização atual do dispositivo.
- * Retorna um objeto de coordenadas (latitude e longitude) ou null em caso de erro.
- * @returns {Promise<Coords | null>} As coordenadas do dispositivo.
+ * Tenta usar a localização atual. Se falhar, tenta obter a última localização conhecida.
+ * @returns {Promise<Coords>} As coordenadas do dispositivo.
+ * @throws {LocationError} Lança um erro se a localização não puder ser obtida.
  */
-export const getCurrentLocation = async (): Promise<Coords | null> => {
+export const getCurrentLocation = async (): Promise<Coords> => {
   try {
-    const permissionStatus = await requestLocationPermission();
-    if (!permissionStatus.granted) {
-      console.error(permissionStatus.error);
-      return null;
+    const isPermissionGranted = await requestLocationPermission();
+    if (!isPermissionGranted) {
+      // requestLocationPermission já lida com o erro, então apenas lançamos
+      // um erro genérico aqui para manter a tipagem.
+      throw new Error();
     }
 
-    const location = await Location.getCurrentPositionAsync({});
-    return {
-      latitude: location.coords.latitude,
-      longitude: location.coords.longitude,
-    };
+    const location = await Location.getCurrentPositionAsync({
+      accuracy: Location.Accuracy.High,
+    });
+    
+    if (location) {
+      return {
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      };
+    }
   } catch (error) {
-    console.error('Erro ao obter a localização:', error);
-    return null;
+    console.warn('Falha ao obter a localização atual. Tentando a última conhecida...');
   }
+
+  // Se a primeira tentativa falhar, tenta a última localização conhecida
+  try {
+    const lastKnownLocation = await Location.getLastKnownPositionAsync();
+    if (lastKnownLocation) {
+      return {
+        latitude: lastKnownLocation.coords.latitude,
+        longitude: lastKnownLocation.coords.longitude,
+      };
+    }
+  } catch (error) {
+    console.error('Falha ao obter a última localização conhecida:', error);
+  }
+
+  throw new LocationError(
+    'Não foi possível obter sua localização. Verifique o GPS ou as configurações do seu dispositivo.',
+    LocationErrorCode.LocationUnavailable
+  );
 };

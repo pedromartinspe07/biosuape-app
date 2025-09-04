@@ -5,7 +5,7 @@
 /**
  * Define a estrutura de dados para um usuário no sistema.
  */
-export interface Usuario {
+export interface IUsuario {
   id: string;
   nome: string;
   email: string;
@@ -15,7 +15,7 @@ export interface Usuario {
 /**
  * Define a estrutura de dados de uma espécie de bioindicador.
  */
-export interface Bioindicador {
+export interface IBioindicador {
   id: string;
   nomePopular: string;
   nomeCientifico: string;
@@ -27,57 +27,77 @@ export interface Bioindicador {
 /**
  * Define a estrutura de dados de uma ocorrência (contribuição do usuário).
  */
-export interface Ocorrencia {
+export interface IOcorrencia {
   id: string;
-  // Relacionamento com outras entidades
   usuarioId: string;
   bioindicadorId: string;
-
-  // Dados da ocorrência
   latitude: number;
   longitude: number;
   dataHora: string; // Formato ISO 8601
   observacoes: string;
-  imageUrl?: string; // Opcional
+  imageUrl?: string | null; // Opcional, pode ser nulo
+  ph?: number | null;
+  temperaturaAgua?: number | null;
+  createdAt: string;
+  updatedAt: string;
+}
 
-  // Dados ambientais
-  ph?: number;
-  temperaturaAgua?: number;
+// --- Tipos de Gráficos (para bibliotecas como react-native-chart-kit) ---
 
-  // Dados de controle
-  createdAt: string; // Data de criação
-  updatedAt: string; // Data de última atualização
+/**
+ * Define a estrutura de dados de um conjunto de dados para um gráfico.
+ */
+interface IChartDataset {
+  data: number[];
+  label?: string;
+  color?: (opacity: number) => string;
+  strokeWidth?: number;
 }
 
 /**
- * Define a estrutura de dados para um relatório analítico.
+ * Define a estrutura de dados para o relatório de gráfico.
  */
-export interface Relatorio {
-  id: string;
-  titulo: string;
-  descricao: string;
-  // Dados do gráfico (ex: para LineChart)
-  dados: {
-    labels: string[];
-    datasets: {
-      data: number[];
-      label?: string;
-    }[];
-  };
+export interface IReportData {
+  labels: string[];
+  datasets: IChartDataset[];
 }
 
-// --- Tipos de Formulários ---
+// --- Tipos de Formulários e UI ---
+
+/**
+ * Define a estrutura de dados para o formulário de login e registro.
+ */
+export interface IAuthFormInput {
+  username?: string;
+  email: string;
+  password: string;
+}
 
 /**
  * Define a estrutura de dados para o formulário de contribuição.
- * Não inclui 'id' nem 'userId' que são gerados no backend.
  */
-export interface ContributionFormInput {
+export interface IContributionFormInput {
   bioindicadorId: string;
   latitude: number;
   longitude: number;
-  ph?: number;
-  temperaturaAgua?: number;
-  observacoes?: string;
-  imageUrl?: string;
+  ph?: number | null;
+  temperaturaAgua?: number | null;
+  observacoes?: string | null;
+  imageUrl?: string | null;
+}
+
+/**
+ * Define a estrutura de dados para a resposta da autenticação.
+ */
+export interface IAuthData {
+  token: string;
+  usuario: IUsuario;
+}
+
+/**
+ * Define a estrutura de dados para mensagens de feedback visual.
+ */
+export interface IMessage {
+  text: string;
+  type: 'success' | 'error' | 'info';
 }

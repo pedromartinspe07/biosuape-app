@@ -4,32 +4,39 @@ import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 /**
- * Formata uma string de data ISO 8601 para o formato 'dd/MM/yyyy às HH:mm'.
- * Retorna a data original se a formatação falhar.
- * @param isoDateString A string de data ISO 8601.
- * @returns A data formatada.
+ * Formata uma string de data ISO 8601 ou um objeto Date para um formato legível.
+ * @param date A string de data ISO 8601 ou o objeto Date.
+ * @param formatString O formato de saída (padrão: "dd/MM/yyyy 'às' HH:mm").
+ * @returns A data formatada como string ou uma mensagem de erro em caso de falha.
  */
-export const formatDate = (isoDateString: string): string => {
+export const formatDate = (
+  date: string | Date,
+  formatString: string = "dd/MM/yyyy 'às' HH:mm"
+): string => {
+  if (!date) {
+    return 'Data inválida';
+  }
   try {
-    const date = parseISO(isoDateString);
-    return format(date, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR });
+    const parsedDate = typeof date === 'string' ? parseISO(date) : date;
+    return format(parsedDate, formatString, { locale: ptBR });
   } catch (error) {
     console.error('Erro ao formatar a data:', error);
-    return isoDateString;
+    return 'Data inválida';
   }
 };
 
 /**
- * Formata um valor numérico para uma casa decimal.
+ * Formata um valor numérico para um número específico de casas decimais.
  * Retorna 'N/A' se o valor não for um número.
  * @param value O valor numérico a ser formatado.
+ * @param decimalPlaces O número de casas decimais (padrão: 1).
  * @returns O valor formatado como string.
  */
-export const formatNumberToOneDecimal = (value?: number): string => {
-  if (typeof value !== 'number' || isNaN(value)) {
+export const formatNumber = (value?: number | null, decimalPlaces: number = 1): string => {
+  if (value === null || typeof value !== 'number' || isNaN(value)) {
     return 'N/A';
   }
-  return value.toFixed(1);
+  return value.toFixed(decimalPlaces);
 };
 
 /**
@@ -39,7 +46,7 @@ export const formatNumberToOneDecimal = (value?: number): string => {
  * @returns A string formatada no padrão 'Lat: X.XXXX, Lng: Y.YYYY'.
  */
 export const formatCoordinates = (lat: number, lng: number): string => {
-  return `Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`;
+  return `Lat: ${formatNumber(lat, 4)}, Lng: ${formatNumber(lng, 4)}`;
 };
 
 /**
