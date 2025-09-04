@@ -9,7 +9,6 @@ import { saveAuthToken } from '../utils/authHelper';
 interface LoginResponse {
   message: string;
   token: string;
-  // Outros dados do usuário, se a API retornar
 }
 
 /**
@@ -37,16 +36,23 @@ const makeRequest = async <T>(endpoint: string, method: string, body?: object): 
     const data = await response.json();
 
     if (!response.ok) {
+      // Lança a mensagem de erro exata da API
       const error = new Error(data.message || 'Ocorreu um erro na requisição.');
-      // Adiciona o status do erro ao objeto para um tratamento mais específico
       (error as any).status = response.status;
       throw error;
     }
 
     return data as T;
   } catch (error) {
-    console.error('Falha na comunicação com o servidor:', error);
-    throw new Error('Não foi possível se conectar ao servidor. Verifique sua conexão.');
+    // Propaga o erro de comunicação com o servidor
+    if (error instanceof Error) {
+        // Verifica se é um erro de rede (Ex: servidor offline)
+        if (error.message.includes('Failed to fetch') || error.message.includes('Network request failed')) {
+            throw new Error('Não foi possível se conectar ao servidor. Verifique sua conexão.');
+        }
+    }
+    // Caso contrário, propaga o erro de resposta do backend
+    throw error;
   }
 };
 
@@ -62,13 +68,12 @@ export const login = async (email: string, password: string): Promise<string> =>
     if (data.token) {
       await saveAuthToken(data.token);
       return data.token;
-    } else {
-      throw new Error('Token de autenticação não recebido.');
     }
+    // Se o token não for recebido, a função makeRequest já teria lançado um erro,
+    // mas este é um bom fallback de segurança.
+    throw new Error('Token de autenticação não recebido.');
   } catch (error) {
-    if (error instanceof Error) {
-      throw new Error(`Falha no login: ${error.message}`);
-    }
+    // Apenas propaga o erro lançado por makeRequest
     throw error;
   }
 };
@@ -79,15 +84,11 @@ export const login = async (email: string, password: string): Promise<string> =>
  */
 export const register = async (username: string, email: string, password: string): Promise<string> => {
   try {
-    // A propriedade 'username' foi ajustada para 'nome' para refletir o modelo User.ts
     const data = await makeRequest<RegisterResponse>('/register', 'POST', { nome: username, email, password });
     
-    // A API agora retorna uma mensagem, que pode ser usada na UI
     return data.message;
   } catch (error) {
-    if (error instanceof Error) {
-      throw new Error(`Falha no cadastro: ${error.message}`);
-    }
+    // Apenas propaga o erro lançado por makeRequest
     throw error;
   }
 };
