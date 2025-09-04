@@ -7,4 +7,4 @@
 // Exemplo de URL de produção: 'https://sua-api.com/api/v1'
 
 // Use a porta do seu servidor Express (3000) e inclua o prefixo de versão '/v1'
-export const API_BASE_URL = 'http://localhost:3000/api/v1';
+export const API_BASE_URL = 'http://biosuape-backend-api-production.up.railway.app:3000/api/v1';
