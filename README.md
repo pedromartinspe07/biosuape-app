@@ -1,50 +1,58 @@
-# Welcome to your Expo app 👋
+BioSuape App - Frontend
+Visão Geral
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Este repositório contém o código-fonte do aplicativo móvel BioSuape, desenvolvido para dispositivos iOS e Android utilizando a framework React Native com Expo. O aplicativo funciona como a interface de usuário para o sistema de monitoramento ambiental, permitindo que cidadãos e pesquisadores contribuam com dados de ocorrências de bioindicadores.
 
-## Get started
+O aplicativo se conecta ao backend (disponível aqui) para autenticação de usuários, submissão de dados e visualização de informações em tempo real.
+Principais Funcionalidades
 
-1. Install dependencies
+    Autenticação de Usuário: Telas de login e registro para gerenciar o acesso do usuário ao aplicativo.
+    !(image_65ebf7.png)
 
-   ```bash
-   npm install
-   ```
+    Mapa Interativo: Um mapa que exibe visualmente as ocorrências de bioindicadores, permitindo que os usuários explorem os dados por geolocalização.
 
-2. Start the app
+    Visualização de Ocorrências: Permite que os usuários filtrem e visualizem as ocorrências por tipo de bioindicador (algas, moluscos, crustáceos, peixes, etc.).
 
-   ```bash
-   npx expo start
-   ```
+    Submissão de Ocorrências: Um formulário intuitivo para registrar novas ocorrências, incluindo detalhes como tipo de bioindicador, localização, observações e dados como pH e temperatura.
+    !(image_65ec18.png)
 
-In the output, you'll find options to open the app in a
+    Relatórios e Análises: Uma seção dedicada para gerar e visualizar relatórios a partir dos dados coletados, oferecendo uma visão analítica sobre a saúde ambiental da região.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+    Gerenciamento de Perfil: Permite que os usuários editem suas informações e gerenciem suas sessões.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+Instalação e Execução
+Pré-requisitos
 
-## Get a fresh project
+    Node.js (versão 18.x ou superior)
 
-When you're ready, run:
+    Expo CLI instalado globalmente: npm install -g expo-cli
 
-```bash
-npm run reset-project
-```
+Passos
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+    Clone este repositório:
 
-## Learn more
+    git clone [https://github.com/pedromartss007/biosuape-frontend.git](https://github.com/pedromartss007/biosuape-frontend.git)
+    cd biosuape-frontend
 
-To learn more about developing your project with Expo, look at the following resources:
+    Instale as dependências:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+    npm install
 
-## Join the community
+    Crie um arquivo .env na raiz do projeto e configure a URL base do seu backend:
 
-Join our community of developers creating universal apps.
+    EXPO_PUBLIC_API_URL=http://localhost:3000/api/v1
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+    (Ajuste o endereço IP se o backend estiver rodando em outro computador ou serviço de hospedagem.)
+
+    Para iniciar o aplicativo em um emulador ou em seu dispositivo físico, execute:
+
+    npm start
+
+        Em seguida, escaneie o código QR com o aplicativo Expo Go (disponível na App Store ou Google Play).
+
+Contribuindo
+
+Contribuições são bem-vindas! Se você tiver alguma sugestão, melhoria ou encontrar algum problema, sinta-se à vontade para abrir uma issue ou um pull request.
+Licença
+
+Este projeto está sob a licença MIT License.
