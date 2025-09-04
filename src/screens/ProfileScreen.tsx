@@ -1,7 +1,6 @@
 // src/screens/ProfileScreen.tsx
 
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -12,9 +11,52 @@ import {
 } from 'react-native';
 import Card from '../components/common/Card';
 import { Colors } from '../constants/colors';
-import { profileService } from '../services/apiService';
 import { IOcorrencia, IUsuario } from '../types/common';
 import { formatDate } from '../utils/dataFormatter';
+
+// --- SIMULAÇÃO DE DADOS (Substitua por sua API quando for o momento) ---
+const mockUser: IUsuario = {
+  id: 'user-123',
+  nome: 'João da Silva',
+  email: 'joao.silva@exemplo.com',
+  dataRegistro: '2025-09-04T10:30:00Z',
+};
+
+const mockOcorrencias: IOcorrencia[] = [
+  {
+    id: 'occ-001',
+    usuarioId: 'user-123',
+    bioindicadorId: '1',
+    latitude: -8.0578,
+    longitude: -34.8828,
+    dataHora: new Date('2025-08-20T14:00:00Z').toISOString(),
+    observacoes: 'Encontrado na praia de Boa Viagem, com muitas algas.',
+    createdAt: new Date('2025-08-20T14:05:00Z').toISOString(),
+    updatedAt: new Date('2025-08-20T14:05:00Z').toISOString(),
+  },
+  {
+    id: 'occ-002',
+    usuarioId: 'user-123',
+    bioindicadorId: '2',
+    latitude: -8.065,
+    longitude: -34.872,
+    dataHora: new Date('2025-08-20T14:00:00Z').toISOString(),
+    observacoes: 'Visto perto do recife de corais.',
+    createdAt: new Date('2025-08-20T14:05:00Z').toISOString(),
+    updatedAt: new Date('2025-08-20T14:05:00Z').toISOString(),
+  },
+];
+
+const fetchUserData = async (): Promise<{
+  user: IUsuario;
+  ocorrencias: IOcorrencia[];
+}> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({ user: mockUser, ocorrencias: mockOcorrencias });
+    }, 1500); // Simula o tempo de carregamento de uma API
+  });
+};
 
 // --- COMPONENTE DE ITEM DE OCORRÊNCIA ---
 const OcorrenciaItem: React.FC<{ item: IOcorrencia }> = ({ item }) => (
@@ -22,10 +64,12 @@ const OcorrenciaItem: React.FC<{ item: IOcorrencia }> = ({ item }) => (
     <View style={styles.cardHeader}>
       <Ionicons name="location-outline" size={20} color={Colors.primary} />
       <Text style={styles.contributionTitle}>
-            Ocorrência em {formatDate(item.dataHora)}
+        Ocorrência em {formatDate(item.dataHora.toString())}
       </Text>
     </View>
-    <Text style={styles.contributionText}>{`Bioindicador ID: ${item.bioindicadorId}`}</Text>
+    <Text style={styles.contributionText}>
+      {`Bioindicador ID: ${item.bioindicadorId}`}
+    </Text>
     {item.observacoes && (
       <Text style={styles.contributionText}>{`Obs: ${item.observacoes}`}</Text>
     )}
@@ -42,20 +86,16 @@ const ProfileScreen: React.FC = () => {
   useEffect(() => {
     const loadUserData = async () => {
       try {
-        // 1. Busca os dados do usuário armazenados localmente
-        const storedUser = await AsyncStorage.getItem('user');
-        if (storedUser) {
-          setUser(JSON.parse(storedUser));
-        }
-
-        // 2. Faz a chamada real à sua API para buscar as ocorrências do usuário
-        const response = await profileService.getProfileData();
-        setOcorrencias(response.data); // Acessa o array 'data' da resposta
+        // Usa a função de simulação de dados
+        const { user: fetchedUser, ocorrencias: fetchedOcorrencias } =
+          await fetchUserData();
+        setUser(fetchedUser);
+        setOcorrencias(fetchedOcorrencias);
       } catch (error) {
         setIsError(true);
         console.error('Falha ao carregar dados do usuário:', error);
       } finally {
-        setIsLoading(false); // Garante que o estado de carregamento seja desativado
+        setIsLoading(false);
       }
     };
     loadUserData();
@@ -156,9 +196,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingBottom: 20,
   },
-  listHeaderContainer: {
-    // Estilos para o cabeçalho da FlatList, se necessário
-  },
+  listHeaderContainer: {},
   profileSection: {
     alignItems: 'center',
     padding: 20,
