@@ -2,7 +2,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
-const API_BASE_URL = 'http://biosuape-backend-api-production.up.railway.app/api/v1'; // Substitua pelo IP da sua máquina e pela porta do backend
+const API_BASE_URL = 'https://biosuape-backend-api-production.up.railway.app/api/v1';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -25,12 +25,28 @@ api.interceptors.request.use(
 export const authService = {
   login: async (email: string, password: string) => {
     const response = await api.post('/login', { email, password });
-    return response.data;
+    const { token, user } = response.data;
+
+    // Salva o token no AsyncStorage
+    await AsyncStorage.setItem('userToken', token);
+
+    return { token, user };
   },
+
   register: async (nome: string, email: string, password: string) => {
     const response = await api.post('/register', { nome, email, password });
-    return response.data;
+    const { token, user } = response.data;
+
+    // Salva o token no AsyncStorage também após o cadastro
+    await AsyncStorage.setItem('userToken', token);
+
+    return { token, user };
   },
+
+  logout: async () => {
+    // Remove o token ao deslogar
+    await AsyncStorage.removeItem('userToken');
+  }
 };
 
 export const profileService = {
