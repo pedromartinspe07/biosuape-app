@@ -1,7 +1,6 @@
-// src/context/AuthContext.tsx
-
 import * as SecureStore from 'expo-secure-store';
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import { setSignOutCallback } from '../services/apiService';
 
 // Definição dos tipos para a autenticação
 export interface User {
@@ -32,6 +31,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Função para fazer o login
+  const signIn = async (token: string, userData: User) => {
+    try {
+      await SecureStore.setItemAsync(TOKEN_KEY, token);
+      setUser(userData);
+    } catch (error) {
+      console.error('Falha ao armazenar o token:', error);
+      throw new Error('Falha no login. Tente novamente.');
+    }
+  };
+
+  // Função para fazer o logout
+  const signOut = async () => {
+    try {
+      await SecureStore.deleteItemAsync(TOKEN_KEY);
+      setUser(null);
+    } catch (error) {
+      console.error('Falha ao remover o token:', error);
+      throw new Error('Falha no logout. Tente novamente.');
+    }
+  };
+
   // Efeito para carregar o token de autenticação ao iniciar o app
   useEffect(() => {
     const loadAuthData = async () => {
@@ -55,29 +76,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
 
     loadAuthData();
+
+    // Configura a função de signOut no apiService.
+    // É importante que esta função seja chamada apenas uma vez.
+    setSignOutCallback(signOut);
   }, []);
-
-  // Função para fazer o login
-  const signIn = async (token: string, userData: User) => {
-    try {
-      await SecureStore.setItemAsync(TOKEN_KEY, token);
-      setUser(userData);
-    } catch (error) {
-      console.error('Falha ao armazenar o token:', error);
-      throw new Error('Falha no login. Tente novamente.');
-    }
-  };
-
-  // Função para fazer o logout
-  const signOut = async () => {
-    try {
-      await SecureStore.deleteItemAsync(TOKEN_KEY);
-      setUser(null);
-    } catch (error) {
-      console.error('Falha ao remover o token:', error);
-      throw new Error('Falha no logout. Tente novamente.');
-    }
-  };
 
   const value = {
     user,
