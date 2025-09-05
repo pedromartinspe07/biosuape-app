@@ -14,8 +14,8 @@ import AppNavigator from './src/navigation/AppNavigator';
 export default function App() {
   // Carrega as fontes personalizadas
   const [fontsLoaded] = useFonts({
-    'Inter-Bold': require('./assets/fonts/scifi2k2.ttf'),
-    'Inter-Regular': require('./assets/fonts/scifi2ki.ttf'),
+    'Inter-Bold': require('./src/assets/fonts/scifi2k2.ttf'),
+    'Inter-Regular': require('/.src/assets/fonts/scifi2ki.ttf'),
     // Adicione outras fontes do projeto aqui, se necessário.
   });
 
