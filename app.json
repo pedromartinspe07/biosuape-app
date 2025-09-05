@@ -15,7 +15,8 @@
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Precisamos de sua localização para que você possa registrar a coordenada de suas descobertas de bioindicadores e contribuir com a ciência.",
         "NSCameraUsageDescription": "Para adicionar fotos às suas descobertas, este aplicativo precisa de acesso à sua câmera.",
-        "NSPhotoLibraryUsageDescription": "Para adicionar fotos existentes às suas descobertas, este aplicativo precisa de acesso à sua galeria de fotos."
+        "NSPhotoLibraryUsageDescription": "Para adicionar fotos existentes às suas descobertas, este aplicativo precisa de acesso à sua galeria de fotos.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -29,7 +30,8 @@
         "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.CAMERA",
         "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE"
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.RECORD_AUDIO"
       ],
       "edgeToEdgeEnabled": true
     },
